@@ -1,0 +1,41 @@
+# Logs
+logs/
+*.jsonl
+gateway_perf.log
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Secrets / environment
+.env
+*.key
+
+# Local artifacts
+results/
+prometheus-data/
+.Trash-0/
+.autodl/
+.DS_Store
+
+# Model weights — too large for GitHub
+models/
+*.safetensors
+*.bin
+
+# Monitoring binaries (installed locally, not vendored)
+prometheus-2.51.0.linux-amd64/
+prometheus-2.51.0.linux-amd64.tar.gz
+grafana-v11.0.0/
+grafana-11.0.0.linux-amd64.tar.gz
+
+# Virtual environments
+.venv/
+venv/
+
+# Intermediate result files (kept selectively in docs/)
+fp16_results.json
+awq_results.json
