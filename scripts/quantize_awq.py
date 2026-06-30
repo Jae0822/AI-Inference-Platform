@@ -29,12 +29,15 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 # Paths
 # ---------------------------------------------------------------------------
 
-FP16_MODEL_PATH = (
-    "/root/autodl-tmp/models/Qwen2.5-7B-Instruct"
-    "/Qwen/Qwen2.5-7B-Instruct"
+FP16_MODEL_PATH = os.environ.get(
+    "FP16_MODEL_PATH",
+    "/root/autodl-tmp/models/Qwen2.5-7B-Instruct/Qwen/Qwen2.5-7B-Instruct",
 )
 
-OUTPUT_PATH = "/root/autodl-tmp/models/Qwen2.5-7B-Instruct-INT4"
+OUTPUT_PATH = os.environ.get(
+    "OUTPUT_PATH",
+    "/root/autodl-tmp/models/Qwen2.5-7B-Instruct-INT4",
+)
 
 
 # ---------------------------------------------------------------------------

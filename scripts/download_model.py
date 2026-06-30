@@ -3,7 +3,7 @@ import os
 from modelscope import snapshot_download
 
 # 1. 明确指定把模型下载到我们的大数据盘，绝对不挤爆系统盘
-output_dir = "/root/autodl-tmp/models/Qwen2.5-7B-Instruct"
+output_dir = os.environ.get("MODEL_OUTPUT_DIR", "/root/autodl-tmp/models/Qwen2.5-7B-Instruct")
 
 print("🚀 正在启动 ModelScope 内网加速引擎...")
 print("📂 大模型将安全存入数据盘仓库:", output_dir)

@@ -23,6 +23,7 @@ M9 middleware fix:
     requests never reach the trace middleware.
 """
 
+import os
 import time
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, List, Optional
@@ -45,9 +46,13 @@ from gateway import session_store
 # Configuration
 # ---------------------------------------------------------------------------
 
-VLLM_URL      = "http://localhost:6006/v1/chat/completions"
-MODEL_PATH    = "/root/autodl-tmp/models/Qwen2.5-7B-Instruct-AWQ/qwen/Qwen2___5-7B-Instruct-AWQ"
-LOG_PATH      = "logs/gateway.jsonl"
+VLLM_URL  = os.environ.get("VLLM_URL", "http://localhost:6006/v1/chat/completions")
+LOG_PATH  = os.environ.get("LOG_PATH", "logs/gateway.jsonl")
+
+_model_path = os.environ.get("MODEL_PATH")
+if _model_path is None:
+    raise RuntimeError("MODEL_PATH environment variable must be set before starting the gateway")
+MODEL_PATH = _model_path
 ENDPOINT_PATH = "/v1/chat/completions"
 
 DEFAULT_SYSTEM_PROMPT = "You are a concise and helpful technical assistant."
