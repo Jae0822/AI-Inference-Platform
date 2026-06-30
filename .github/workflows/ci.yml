@@ -1,0 +1,117 @@
+name: AI Inference Platform CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run ruff
+        run: |
+          ruff check . --output-format=github
+
+  typecheck:
+    name: Type check (mypy)
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run mypy
+        run: |
+          mypy gateway/ --ignore-missing-imports --no-strict-optional
+
+  test:
+    name: Tests (pytest)
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run test suite
+        run: |
+          pytest tests/ -v --tb=short
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            .pytest_cache/
+          retention-days: 7
+
+  regression:
+    name: Performance regression check
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check if benchmark results exist
+        id: check_results
+        run: |
+          if [ -f "results/locust_raw.csv" ]; then
+            echo "has_results=true" >> $GITHUB_OUTPUT
+            echo "Found results/locust_raw.csv - running regression check"
+          else
+            echo "has_results=false" >> $GITHUB_OUTPUT
+            echo "No results/locust_raw.csv found - skipping regression check"
+          fi
+
+      - name: Run regression check
+        if: steps.check_results.outputs.has_results == 'true'
+        run: |
+          python scripts/check_regression.py --current results/locust_raw.csv
+
+      - name: Post regression summary
+        if: steps.check_results.outputs.has_results == 'true'
+        run: |
+          echo "### Performance Regression Report" >> $GITHUB_STEP_SUMMARY
+          echo "Baseline: baseline.json" >> $GITHUB_STEP_SUMMARY
+          echo "Current:  results/locust_raw.csv" >> $GITHUB_STEP_SUMMARY
+          python scripts/check_regression.py --current results/locust_raw.csv >> $GITHUB_STEP_SUMMARY 2>&1 || true

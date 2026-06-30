@@ -1,0 +1,51 @@
+[tool.ruff]
+line-length = 100
+
+exclude = [
+    ".git",
+    "__pycache__",
+    "*.egg-info",
+    "results/",
+    "prometheus-data/",
+    ".ipynb_checkpoints",
+    ".Trash-0",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+]
+
+ignore = [
+    "E501",
+    "E402",
+    "F401",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["gateway"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = false
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = [
+    "results/",
+    "prometheus-data/",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--no-header",
+]
