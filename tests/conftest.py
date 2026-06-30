@@ -16,8 +16,7 @@ import asyncio
 import pytest
 import pytest_asyncio
 
-from gateway import rate_limiter
-from gateway import session_store
+from gateway import rate_limiter, session_store
 
 # ---------------------------------------------------------------------------
 # Event loop scope
