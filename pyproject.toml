@@ -3,6 +3,9 @@ name = "ai-inference-platform"
 version = "0.1.0"
 requires-python = ">=3.11"
 
+[tool.setuptools.packages.find]
+include = ["gateway*"]
+
 [tool.ruff]
 line-length = 100
 
