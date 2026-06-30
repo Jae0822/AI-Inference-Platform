@@ -1,0 +1,201 @@
+{
+  "id": null,
+  "uid": "ai-inference-platform",
+  "title": "AI Inference Platform",
+  "tags": ["llm", "vllm", "gateway"],
+  "timezone": "browser",
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "schemaVersion": 38,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request Rate (req/s)",
+      "description": "Incoming requests per second. success=200, error=non-200.",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list" } },
+      "targets": [
+        {
+          "expr": "rate(gateway_http_requests_total{status_code=\"200\"}[1m])",
+          "legendFormat": "success req/s",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        },
+        {
+          "expr": "rate(gateway_http_requests_total{status_code!=\"200\"}[1m])",
+          "legendFormat": "error req/s",
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Time to First Token — p50 / p95 / p99 (ms)",
+      "description": "TTFT distribution. p99 is your SLO target.",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(gateway_llm_ttft_seconds_bucket[1m])) * 1000",
+          "legendFormat": "p50 TTFT (ms)",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(gateway_llm_ttft_seconds_bucket[1m])) * 1000",
+          "legendFormat": "p95 TTFT (ms)",
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(gateway_llm_ttft_seconds_bucket[1m])) * 1000",
+          "legendFormat": "p99 TTFT (ms)",
+          "refId": "C",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Tokens per Second (throughput)",
+      "description": "Streaming throughput distribution. Drop under load = KV cache pressure or GPU saturation.",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(gateway_llm_tokens_per_second_bucket[1m]))",
+          "legendFormat": "p50 tok/s",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(gateway_llm_tokens_per_second_bucket[1m]))",
+          "legendFormat": "p95 tok/s",
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Active Requests (concurrency)",
+      "description": "Streaming requests currently in flight. Flatlines at saturation point during load test.",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "lineWidth": 2, "fillOpacity": 20 }
+        }
+      },
+      "options": { "tooltip": { "mode": "single" }, "legend": { "displayMode": "list" } },
+      "targets": [
+        {
+          "expr": "gateway_http_active_requests",
+          "legendFormat": "active requests",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "GPU Utilization & Power",
+      "description": "Utilization spikes to ~100% during inference. Sustained 100% = compute-bound.",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "utilization %" },
+            "properties": [
+              { "id": "unit", "value": "percent" },
+              { "id": "max", "value": 100 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "power W" },
+            "properties": [
+              { "id": "unit", "value": "watt" },
+              { "id": "custom.axisPlacement", "value": "right" }
+            ]
+          }
+        ]
+      },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list" } },
+      "targets": [
+        {
+          "expr": "gateway_gpu_utilization_ratio{gpu_index=\"0\"} * 100",
+          "legendFormat": "utilization %",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        },
+        {
+          "expr": "gateway_gpu_power_watts{gpu_index=\"0\"}",
+          "legendFormat": "power W",
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "VRAM Usage",
+      "description": "Used vs total VRAM. Gap = KV cache headroom. Shrinks to zero under heavy concurrency = TTFT spikes.",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list" } },
+      "targets": [
+        {
+          "expr": "gateway_gpu_vram_used_bytes{gpu_index=\"0\"}",
+          "legendFormat": "VRAM used",
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        },
+        {
+          "expr": "gateway_gpu_vram_total_bytes{gpu_index=\"0\"}",
+          "legendFormat": "VRAM total",
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "afqk2bwj8pfr4f" }
+        }
+      ]
+    }
+  ]
+}
