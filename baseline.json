@@ -1,0 +1,19 @@
+{
+  "_comment": "Performance baseline committed to repo. check_regression.py compares against this. Update intentionally after verified improvements.",
+  "_model": "Qwen2.5-7B-Instruct AWQ INT4 (awq_marlin kernel)",
+  "_measured_at": "M11 sweep, Config C (max-num-seqs=256), 50 concurrent users",
+  "_gateway_version": "M13",
+
+  "ttft_p50_ms": 24,
+  "ttft_p99_ms": 240,
+  "total_p50_ms": 336,
+  "total_p99_ms": 585,
+  "tps_p50": 157.1,
+
+  "regression_thresholds": {
+    "_comment": "CI fails if metric degrades beyond this % from baseline.",
+    "ttft_p99_ms": 15,
+    "total_p99_ms": 15,
+    "tps_p50": 10
+  }
+}
