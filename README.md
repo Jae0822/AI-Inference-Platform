@@ -80,6 +80,24 @@ Production-style LLM serving system built on **vLLM + FastAPI**, developed acros
 
 ---
 
+## Load Test Results — AWQ INT4 Model
+
+| Concurrency | TTFT p99 | Total p99 | TPS p50 |
+|---|---|---|---|
+| 1 user    |  38 ms |  402 ms | 156 tok/s |
+| 10 users  |  91 ms |  422 ms | 154 tok/s |
+| 50 users  | 150 ms |  500 ms | 146 tok/s |
+| 100 users | 310 ms |  693 ms | 132 tok/s |
+
+*vs FP16 baseline (50 users): TTFT p99=219ms, Total p99=1335ms, TPS=54 tok/s*
+
+Live Grafana dashboard captured during 1→100 concurrent user ramp
+(AWQ INT4 + awq_marlin kernel + max-num-seqs=256):
+
+![Grafana Dashboard](docs/images/grafana_load_test_overview.png)
+
+---
+
 ## Milestone Map
 
 | Milestone | What it built | Key files |
